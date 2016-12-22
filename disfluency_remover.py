@@ -1,18 +1,32 @@
 import math
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-test', '--testfile', help='Name of file to be translated (one parse per line)', default='data/test.txt')
+parser.add_argument('-train', '--trainfile', help='Name of file to output the translations to', default='data/train.txt')
+parser.add_argument('-o', '--outfile', help='Name of output file', default='output.log')
+parser.add_argument('-n', '--ngrams', help='Number of grams to use in this model', default=2)
+args = parser.parse_args()
 
 def main():
-	# part 1 - unigram model
-	print('Unigram Model:')
-	unigram('data/train.txt', 'data/test.txt')
-	# part 2 - bigram model
-	print('\nBigram Model:')
-	bigram('data/train.txt', 'data/test.txt')
-	# part 2 - extended model
-	print('\nTrigram Model:')
-	trigram('data/train.txt', 'data/test.txt')
+	train = args.trainfile
+	test = args.testfile
+	ngram = int(args.ngrams)
+	if ngram == 1:
+		print('Unigram Model:')
+		unigram(train, test)
+	elif ngram == 2:
+		print('Bigram Model:')
+		bigram(train, test)
+	elif ngram == 3:
+		print('Trigram Model:')
+		trigram(train, test)
+	else:
+		print('Invalid ngram chosen. Please use either a unigram (1), a bigram (2), or a trigram (3) model')
 
 def unigram(trainfile, testfile):
-	outfile = open('unigram.log', 'w+')
+	outname = args.outfile
+	outfile = open(outname, 'w+')
 	counts = {} 	# dictionary containing a word as a key and a dictionary of tags and counts of the tags as a value
 	tags = set()
 	for line in open(trainfile):
@@ -51,7 +65,8 @@ def unigram(trainfile, testfile):
 	print('accuracy of unigram on test: ', correct/total)
 
 def bigram(trainfile, testfile):
-	outfile = open('bigram.log', 'w+')
+	outname = args.outfile
+	outfile = open(outname, 'w+')
 	# get tag-word and tag-tag counts
 	all_tags = ['N', 'F', 'E', 'D', 'A', 'R', 'Y', 'Z']
 	all_tps = get_tprime(1, all_tags, all_tags)
@@ -93,7 +108,7 @@ def bigram(trainfile, testfile):
 				tags.append(pair[1])
 		words.append('</s>')
 		tags.append('Z')
-		viterbi, pointer = viter(ptw, ptt, words, all_tags, all_tps)	### changed
+		viterbi, pointer = viter(ptw, ptt, words, all_tags, all_tps)
 		# trace back through pointer to get best guess
 		guess = ['Z']
 		for i in range(len(words)-1,0,-1):
@@ -112,7 +127,8 @@ def bigram(trainfile, testfile):
 	print('accuracy = ', correct/total)
 
 def trigram(trainfile, testfile):
-	outfile = open('trigram.log', 'w+')
+	outname = args.outfile
+	outfile = open(outname, 'w+')
 	# get tag-word and tag-tag counts
 	all_tags = ['N', 'F', 'E', 'D', 'A', 'R', 'Y', 'Z']
 	all_tps = new_get_tprime(2, all_tags, all_tags)
